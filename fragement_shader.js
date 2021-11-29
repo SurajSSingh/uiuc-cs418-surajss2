@@ -16,8 +16,8 @@ out vec4 outColor;
 void main() {
   vec2 cylinderTexCoord = vec2(0.0,0.0);
   vec2 sphereTexCoord = vec2(0.0,0.0);
-  cylinderTexCoord.s = (-atan(vPosition.z, vPosition.x)+0.5)/(2.0*PI);
-  cylinderTexCoord.t = vPosition.y + 0.5;
+  cylinderTexCoord.s = clamp((-atan(vPosition.z, vPosition.x))/(2.0*PI)+0.5,0.05,0.95);
+  cylinderTexCoord.t = smoothstep(0.15,0.85,vPosition.y + 0.5);
   vec3 n2 = normalize(n);
   sphereTexCoord.s = (n2.x+1.0)/2.0;
   sphereTexCoord.t = (n2.y+1.0)/2.0;
@@ -41,7 +41,7 @@ void main() {
   vec3 diffuse = diffuse_value * diffuse_color * 0.5 * specular_value;
   vec3 specular = diffuse_value * specular_color * 1.0 * specular_value;
   vec3 ambient = vec3(1.0, 1.0, 1.0);
-  c = specular_color; //+ diffuse_color + (ambient * diffuse_value) - 1.0;
+  c = diffuse_color * specular_color;
   outColor = 1.0*vec4(c,1.0);
 }
 `
