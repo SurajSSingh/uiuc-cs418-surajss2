@@ -24,11 +24,11 @@ void main() {
 
   float lightXPos = -1.0;
   float lightYPos = 1.0;
-  float lightZPos = 1.0;
+  float lightZPos = 0.0;
 
 
   n = uNormalMatrix*aVertexNormal;
-  l = vec3(lightXPos,lightYPos,lightZPos);
+  l = -vec3(lightXPos,lightYPos,lightZPos);
   vec4 p = uModelViewMatrix*vec4(aVertexPosition, 1.0);
   v = -p.xyz;
   
