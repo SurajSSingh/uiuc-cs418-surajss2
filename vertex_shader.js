@@ -12,6 +12,9 @@ uniform mat4 uProjectionMatrix;
 out vec2 vTexCoord;
 out vec3 vNormal, vPosition;
 out vec3 n,l,v;
+// n = normal
+// l = light
+// v = view 
 
 void main() {
   vPosition = aVertexPosition;
@@ -19,10 +22,15 @@ void main() {
   vTexCoord.s = aVertexPosition.x + 0.5;
   vTexCoord.t = aVertexPosition.y + 0.5;
 
-  n = normalize(uNormalMatrix*aVertexNormal);
-  l = normalize(uNormalMatrix*vec3(1.0,0.25,0.0));
+  float lightXPos = -1.0;
+  float lightYPos = 1.0;
+  float lightZPos = 1.0;
+
+
+  n = uNormalMatrix*aVertexNormal;
+  l = vec3(lightXPos,lightYPos,lightZPos);
   vec4 p = uModelViewMatrix*vec4(aVertexPosition, 1.0);
-  v = normalize(-p.xyz);
+  v = -p.xyz;
   
   gl_Position = uProjectionMatrix*p;
 }
