@@ -87,13 +87,14 @@ function initwebgl() {
                 new Uint16Array(teapot.faces),
                 gl.STATIC_DRAW);
 
+  let imageSize = 512;
   //
   // set up texture and sampler
   //
 
   texture = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture);
-
+  gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   var sampler = gl.createSampler();
   gl.bindSampler(0, sampler);
 
@@ -107,11 +108,12 @@ function initwebgl() {
                 gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
 
   var image = new Image();
-  image.src = "illinois512.png";
+  image.src = `illinois${imageSize}.png`;
 
   image.addEventListener("load", function() {
     gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, imageSize, imageSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
     gl.generateMipmap(gl.TEXTURE_2D);
   });
 
@@ -121,7 +123,7 @@ function initwebgl() {
 
   texture2 = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture2);
-
+  // gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   var sampler2 = gl.createSampler();
   gl.bindSampler(1, sampler2);
 
@@ -136,7 +138,7 @@ function initwebgl() {
 
   var image2 = new Image();
   image2.src = "stadium sphere.jpg";
-
+    
   image2.addEventListener("load", function() {
     gl.bindTexture(gl.TEXTURE_2D, texture2);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 256, 256, 0, gl.RGBA, gl.UNSIGNED_BYTE, image2);
@@ -149,7 +151,7 @@ function initwebgl() {
 
   texture3 = gl.createTexture();
   gl.bindTexture(gl.TEXTURE_2D, texture3);
-
+  // gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
   var sampler3 = gl.createSampler();
   gl.bindSampler(2, sampler3);
 
@@ -163,11 +165,11 @@ function initwebgl() {
                 gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
 
   var image3 = new Image();
-  image3.src = "i512_bump.png";
+  image3.src = `i${imageSize}_bump.png`;
 
   image3.addEventListener("load", function() {
     gl.bindTexture(gl.TEXTURE_2D, texture3);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 512, 512, 0, gl.RGBA, gl.UNSIGNED_BYTE, image3);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, imageSize, imageSize, 0, gl.RGBA, gl.UNSIGNED_BYTE, image3);
     gl.generateMipmap(gl.TEXTURE_2D);
   });
 

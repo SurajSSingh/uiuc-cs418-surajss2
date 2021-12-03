@@ -22,7 +22,7 @@ void main() {
   vTexCoord.s = aVertexPosition.x + 0.5;
   vTexCoord.t = aVertexPosition.y + 0.5;
 
-  float lightXPos = -1.0;
+  float lightXPos = 0.0;
   float lightYPos = 1.0;
   float lightZPos = 0.0;
 
