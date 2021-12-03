@@ -69,48 +69,35 @@ void main() {
   vec3 v2 = normalize(v);
   
   // Calculate cylinder coordinate and apply diffuse
-  vec2 cylinderTexCoord = GetCylinderTextureCoordinates(vPosition); //vec2(0.0,0.0);
-  // cylinderTexCoord.s = clamp((-atan(vPosition.z, vPosition.x))/(2.0*PI)+0.5,0.05,0.95);
-  // cylinderTexCoord.t = smoothstep(0.15,0.85,vPosition.y + 0.5);
+  vec2 cylinderTexCoord = GetCylinderTextureCoordinates(vPosition);
   vec3 diffuse_texture = vec3(texture(uSampler, cylinderTexCoord));  
   
   // Calculate updated normal from normal map
   vec3 bump_texture = vec3(texture(uSampler3, cylinderTexCoord));
-  // bump_texture = bump_texture;
-  
-  // float normalPower = bump_texture.z;
-  // vec3 up = vec3(0.0, 1.0, 0.0);
-  // vec3 pt = (cross(up, n2));
-  // vec3 ps = (cross(pt, n2));
-  // float dBds = bump_texture.x-0.5;
-  // float dBdt = bump_texture.y-0.5;
-  
-  vec3 nprime = ApplyBumpNormalMap(bump_texture, n2);//(n2 - dBds * cross(n2, pt) + dBdt * cross(n2, ps))*normalPower;
+  vec3 nprime = ApplyBumpNormalMap(bump_texture, n2);
   
   // Calculate the diffuse and specular values
   float diffuse_value = max(dot(nprime,-l2)-0.5,0.0);
-  vec3 r = (2.0 * max(dot(l2,nprime),0.0) * nprime - l2);
-  // vec3 r = reflect(l2,nprime);
-  float specular_value = pow(max(dot(v2, r), 0.0), 5.0);
+  vec3 r = (2.0 * max(dot(-l2,nprime),0.0) * nprime - l2);
+  float specular_power = 10.0;
+  float specular_offset = 0.005;
+  float specular_value = pow(max(dot(v2, r), 0.0), specular_power)/specular_power * specular_offset;
   
   // Calculate sphere coordinates and apply Reflectance
-  vec2 sphereTexCoord = GetSphericalTextureCoordinates(nprime);//vec2(1.0,1.0);
-  // sphereTexCoord.s = (nprime.x+1.0)/2.0;
-  // sphereTexCoord.t = (nprime.y+1.0)/2.0;
+  vec2 sphereTexCoord = GetSphericalTextureCoordinates(nprime);
   vec3 reflectence_texture = vec3(texture(uSampler2, sphereTexCoord));
 
   
   // Calculate color components for Phong shading
-  vec4 color_mix_amount = vec4(0.25, 0.1, 0.25, 0.3);
-  // vec3 diffuse_color = mix(diffuse_texture, proc_main_color, clamp(dot_mix.x*dot_mix.z, 0.0, 1.0)) * (diffuse_value + color_mix_amount.x);  
+  vec4 color_mix_amount = vec4(0.25, 0.1, 0.25, 0.1);
   vec3 diffuse_color = MarbleProceduralTextureApply(vPosition, diffuse_texture) * (diffuse_value + color_mix_amount.x);
-  vec3 specular_color = vec3(1.0,1.0,1.0) * (specular_value * color_mix_amount.y);
+  vec3 specular_color = vec3(1.0,1.0,0.75) * specular_value;
   vec3 reflectence_color = reflectence_texture * color_mix_amount.z;
   vec3 ambient_color = vec3(1.0,1.0,1.0) * color_mix_amount.w;
   
   // Combine all the colors
   vec3 color = diffuse_color + reflectence_color + specular_color + ambient_color;
-  //color = sin(procPos).rrr;//proc_main_color*((dot_mix.x+dot_mix.z)*0.5*dot_mix.y);//r * specular_value;//subsurf_color.rrr;
+  // color = specular_color * specular_value;//vec3(1.0,0.0,0.0)*specular_value;//sin(procPos).rrr;//proc_main_color*((dot_mix.x+dot_mix.z)*0.5*dot_mix.y);//r * specular_value;//subsurf_color.rrr;
 
   outColor = 1.0*vec4(color,1.0);
 }

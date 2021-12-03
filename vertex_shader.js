@@ -22,9 +22,9 @@ void main() {
   vTexCoord.s = aVertexPosition.x + 0.5;
   vTexCoord.t = aVertexPosition.y + 0.5;
 
-  float lightXPos = -0.5;
-  float lightYPos = 1.0;
-  float lightZPos = 0.5;
+  float lightXPos = 1.5;
+  float lightYPos = 2.0;
+  float lightZPos = 1.5;
 
 
   n = uNormalMatrix*aVertexNormal;
