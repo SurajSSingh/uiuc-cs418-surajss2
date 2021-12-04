@@ -26,23 +26,23 @@ vec3 ApplyBumpNormalMap(vec3 bump_texture, vec3 normal)
   return (normal - dBds * cross(normal, pt) + dBdt * cross(normal, ps)) * normalPower;
 }
 
-vec3 MarbleProceduralTextureApply(vec3 vPosition, vec3 diffuse_texture)
+vec3 ProceduralTextureApply(vec3 vPosition)
 {
   // Procedurally produce a texture
   // only on areas without decal
-  vec3 proc_main_color = vec3(0.95,0.85,0.75);
+  vec3 proc_main_color = vec3(0.22,0.55,0.77);
   vec3 dist_threshold = vec3(0.25, 0.25, 0.25);
-  vec3 dist_mult = vec3(20.0, 10.0, 20.0);
-  float color_mask = min(min(diffuse_texture.x, diffuse_texture.y), diffuse_texture.z);
+  vec3 dist_mult = vec3(100.0, 2.5, 25.0);
+  //float color_mask = floor(min(min(diffuse_texture.x, diffuse_texture.y), diffuse_texture.z));
   vec3 procPos = vPosition * dist_mult;
   
   vec3 dot_mix = vec3(
-    max(color_mask-max(distance(procPos.x, round(procPos.x)) - dist_threshold.x, 0.0), 0.0),
-    max(color_mask-max(distance(procPos.y, round(procPos.y)) - dist_threshold.y, 0.0), 0.0),
-    max(color_mask-max(distance(procPos.z, round(procPos.z)) - dist_threshold.z, 0.0), 0.0)
+    max(1.0 - max(distance(procPos.x, round(procPos.x)) - dist_threshold.x, 0.0), 0.0),
+    max(1.0 - max(distance(procPos.y, round(procPos.y)) - dist_threshold.y, 0.0), 0.0),
+    max(1.0 - max(distance(procPos.z, round(procPos.z)) - dist_threshold.z, 0.0), 0.0)
   );
-
-  return mix(diffuse_texture, proc_main_color, clamp(dot_mix.x*dot_mix.z, 0.0, 1.0));
+  float proc_strength = 10.0;
+  return mix(vec3(0.0,0.0,0.0), proc_main_color, max((dot_mix - dot_mix.yyy).z * dot_mix.x, 0.0)) * proc_strength;
 }
 
 vec2 GetCylinderTextureCoordinates(vec3 pos)
@@ -88,16 +88,17 @@ void main() {
   vec3 reflectence_texture = vec3(texture(uSampler2, sphereTexCoord));
 
   
-  // Calculate color components for Phong shading
-  vec4 color_mix_amount = vec4(0.25, 0.1, 0.25, 0.1);
-  vec3 diffuse_color = MarbleProceduralTextureApply(vPosition, diffuse_texture) * (diffuse_value + color_mix_amount.x);
+  // Calculate color components (extended Phong shading)
+  vec4 color_mix_amount = vec4(0.25, 0.5, 0.25, 0.1);
+  vec3 diffuse_color = diffuse_texture * (diffuse_value + color_mix_amount.x);
+  vec3 procedural_color = ProceduralTextureApply(vPosition) * color_mix_amount.y;
   vec3 specular_color = vec3(1.0,1.0,0.75) * specular_value;
   vec3 reflectence_color = reflectence_texture * color_mix_amount.z;
   vec3 ambient_color = vec3(1.0,1.0,1.0) * color_mix_amount.w;
   
   // Combine all the colors
-  vec3 color = diffuse_color + reflectence_color + specular_color + ambient_color;
-  // color = specular_color * specular_value;//vec3(1.0,0.0,0.0)*specular_value;//sin(procPos).rrr;//proc_main_color*((dot_mix.x+dot_mix.z)*0.5*dot_mix.y);//r * specular_value;//subsurf_color.rrr;
+  vec3 color = diffuse_color + procedural_color + reflectence_color + specular_color + ambient_color;
+  // color = procedural_color;//specular_color * specular_value;//vec3(1.0,0.0,0.0)*specular_value;//sin(procPos).rrr;//proc_main_color*((dot_mix.x+dot_mix.z)*0.5*dot_mix.y);//r * specular_value;//subsurf_color.rrr;
 
   outColor = 1.0*vec4(color,1.0);
 }
