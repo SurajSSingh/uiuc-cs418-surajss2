@@ -26,23 +26,14 @@ vec3 ApplyBumpNormalMap(vec3 bump_texture, vec3 normal)
   return (normal - dBds * cross(normal, pt) + dBdt * cross(normal, ps)) * normalPower;
 }
 
-vec3 ProceduralTextureApply(vec3 vPosition)
+vec3 IsolateSpout(vec3 vPosition)
 {
-  // Procedurally produce a texture
-  // only on areas without decal
-  vec3 proc_main_color = vec3(0.22,0.55,0.77);
-  vec3 dist_threshold = vec3(0.25, 0.25, 0.25);
-  vec3 dist_mult = vec3(100.0, 2.5, 25.0);
-  //float color_mask = floor(min(min(diffuse_texture.x, diffuse_texture.y), diffuse_texture.z));
-  vec3 procPos = vPosition * dist_mult;
-  
-  vec3 dot_mix = vec3(
-    max(1.0 - max(distance(procPos.x, round(procPos.x)) - dist_threshold.x, 0.0), 0.0),
-    max(1.0 - max(distance(procPos.y, round(procPos.y)) - dist_threshold.y, 0.0), 0.0),
-    max(1.0 - max(distance(procPos.z, round(procPos.z)) - dist_threshold.z, 0.0), 0.0)
-  );
-  float proc_strength = 10.0;
-  return mix(vec3(0.0,0.0,0.0), proc_main_color, max((dot_mix - dot_mix.yyy).z * dot_mix.x, 0.0)) * proc_strength;
+  return vec3(1.0, 1.0, 1.0) * clamp((vPosition.xxx - 0.263) * 100.0, 0.0, 1.0);
+}
+
+vec3 IsolateHandle(vec3 vPosition)
+{
+  return vec3(1.0, 1.0, 1.0) * clamp((-vPosition.xxx - 0.3) * 8.0, 0.0, 1.0);
 }
 
 vec2 GetCylinderTextureCoordinates(vec3 pos)
@@ -60,6 +51,29 @@ vec2 GetSphericalTextureCoordinates(vec3 pos)
     (pos.y+1.0)/2.0
   );
 }
+
+vec3 ProceduralTextureApply(vec3 vPosition)
+{
+  // Procedurally produce a texture
+  // only on areas without decal
+  vec3 proc_primary_color = vec3(0.22,0.55,0.77);
+  vec3 proc_secondary_color = vec3(0.77,0.55,0.22);
+  vec3 dist_threshold = vec3(0.25, 0.25, 0.25);
+  vec3 dist_mult = vec3(128.0, 32.0,64.0);
+  vec3 procPos = vPosition * dist_mult;
+  
+  vec3 dot_mix = vec3(
+    max(1.0 - max(distance(floor(procPos.x), round(procPos.x)) - dist_threshold.x, 0.0), 0.0),
+    max(1.0 - max(distance(procPos.y, round(procPos.y)) - dist_threshold.y, 0.0), 0.0),
+    max(1.0 - max(distance(floor(procPos.z), round(procPos.z)) - dist_threshold.z, 0.0), 0.0)
+  );
+  float proc_strength = 10.0;
+  // proc_primary_color =  mix(vec3(0.0,0.0,0.0), proc_primary_color, IsolateSpout(vPosition) * max((dot_mix - dot_mix.yyy).z * dot_mix.x, 0.0)) * proc_strength;
+  // proc_secondary_color = mix(vec3(0.0,0.0,0.0), proc_secondary_color, IsolateHandle(vPosition) * max((dot_mix*2.0 - dot_mix.yyy).x * dot_mix.z, 0.0)) * proc_strength;
+  return IsolateSpout(vPosition) * max((dot_mix - dot_mix.yyy).z * dot_mix.x, 0.0) * proc_strength +
+         IsolateHandle(vPosition) * max((dot_mix*0.4 - dot_mix.zzz).y * dot_mix.y, 0.0) * proc_strength;//proc_secondary_color; //+ proc_secondary_color;
+}
+
 
 void main() {
 
@@ -89,12 +103,15 @@ void main() {
 
   
   // Calculate color components (extended Phong shading)
-  vec4 color_mix_amount = vec4(0.25, 0.5, 0.25, 0.1);
+  
+  vec4 color_mix_amount = vec4(0.25, 0.25, 0.25, 0.1);
+  
   vec3 diffuse_color = diffuse_texture * (diffuse_value + color_mix_amount.x);
-  vec3 procedural_color = ProceduralTextureApply(vPosition) * color_mix_amount.y;
-  vec3 specular_color = vec3(1.0,1.0,0.75) * specular_value;
+  vec3 procedural_color = vec3(1.0,0.5,0.25) * ProceduralTextureApply(vPosition) * (color_mix_amount.y);
   vec3 reflectence_color = reflectence_texture * color_mix_amount.z;
   vec3 ambient_color = vec3(1.0,1.0,1.0) * color_mix_amount.w;
+  
+  vec3 specular_color = vec3(1.0,1.0,0.75) * specular_value;
   
   // Combine all the colors
   vec3 color = diffuse_color + procedural_color + reflectence_color + specular_color + ambient_color;
