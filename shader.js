@@ -87,7 +87,7 @@ function initwebgl() {
                 new Uint16Array(teapot.faces),
                 gl.STATIC_DRAW);
 
-  let imageSize = 512;
+  let imageSize = 1024;
   //
   // set up texture and sampler
   //
