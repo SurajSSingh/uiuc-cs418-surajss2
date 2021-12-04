@@ -68,8 +68,6 @@ vec3 ProceduralTextureApply(vec3 vPosition)
     max(1.0 - max(distance(floor(procPos.z), round(procPos.z)) - dist_threshold.z, 0.0), 0.0)
   );
   float proc_strength = 10.0;
-  // proc_primary_color =  mix(vec3(0.0,0.0,0.0), proc_primary_color, IsolateSpout(vPosition) * max((dot_mix - dot_mix.yyy).z * dot_mix.x, 0.0)) * proc_strength;
-  // proc_secondary_color = mix(vec3(0.0,0.0,0.0), proc_secondary_color, IsolateHandle(vPosition) * max((dot_mix*2.0 - dot_mix.yyy).x * dot_mix.z, 0.0)) * proc_strength;
   return IsolateSpout(vPosition) * max((dot_mix - dot_mix.yyy).z * dot_mix.x, 0.0) * proc_strength +
          IsolateHandle(vPosition) * max((dot_mix*0.4 - dot_mix.zzz).y * dot_mix.y, 0.0) * proc_strength;//proc_secondary_color; //+ proc_secondary_color;
 }
@@ -115,7 +113,6 @@ void main() {
   
   // Combine all the colors
   vec3 color = diffuse_color + procedural_color + reflectence_color + specular_color + ambient_color;
-  // color = procedural_color;//specular_color * specular_value;//vec3(1.0,0.0,0.0)*specular_value;//sin(procPos).rrr;//proc_main_color*((dot_mix.x+dot_mix.z)*0.5*dot_mix.y);//r * specular_value;//subsurf_color.rrr;
 
   outColor = 1.0*vec4(color,1.0);
 }
