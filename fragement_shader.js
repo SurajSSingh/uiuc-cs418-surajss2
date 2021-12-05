@@ -33,7 +33,7 @@ vec3 IsolateSpout(vec3 vPosition)
 
 vec3 IsolateHandle(vec3 vPosition)
 {
-  return vec3(1.0, 1.0, 1.0) * clamp((-vPosition.xxx - 0.3) * 8.0, 0.0, 1.0);
+  return vec3(1.0, 1.0, 1.0) * clamp((-vPosition.xxx - 0.35) * 8.0, 0.0, 1.0);
 }
 
 vec2 GetCylinderTextureCoordinates(vec3 pos)
@@ -102,9 +102,9 @@ void main() {
   // Calculate the diffuse and specular values
   float diffuse_value = max(dot(nprime,l2)-0.5,0.0);
   vec3 r = (2.0 * max(dot(l2,nprime),0.0) * nprime + l2);
-  float specular_power = 10.0;
-  float specular_offset = 0.005;
-  float specular_value = pow(max(dot(v2, r), 0.0), specular_power)/specular_power * specular_offset;
+  float specular_gleam = 10.0;
+  float specular_power = 0.002;
+  float specular_value = pow(max(dot(v2, r), 0.0), specular_gleam)/specular_gleam * specular_power;
   
   // Calculate sphere coordinates and apply Reflectance
   vec2 sphereTexCoord = GetSphericalTextureCoordinates(nprime);
@@ -113,7 +113,7 @@ void main() {
   
   // Calculate color components (extended Phong shading)
   
-  vec4 color_mix_amount = vec4(0.25, 0.25, 0.25, 0.1);
+  vec4 color_mix_amount = vec4(0.23, 0.4, 0.22, 0.15);
   
   vec3 diffuse_color = diffuse_texture * (diffuse_value + color_mix_amount.x);
   vec3 procedural_color = ProceduralTextureApply(vPosition, vec3(1.0,0.5,0.25), vec3(0.25,0.5,1.0)) * (color_mix_amount.y);
